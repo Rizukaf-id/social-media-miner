@@ -116,6 +116,25 @@ const crawlerConfig = {
         } catch (e) {
             console.error(`[ERROR] Failed to save profile files: ${e}`);
         }
+    } else if (action.toLocaleLowerCase() === 'content') {
+        const contentFolderName = `${platform}-${action}-${safeQuery}-${timestamp}`;
+        const contentFolderPath = path.join(folderPath, contentFolderName);
+
+        if (!fs.existsSync(contentFolderPath)) fs.mkdirSync(contentFolderPath);
+        
+        const contentData = items.filter(i => i.dataType === 'content_details');
+        const commentsData = items.filter(i => i.dataType === 'content_comments');
+
+        try {
+            writeCsv(contentData, path.join(contentFolderPath, '1_content_details.csv'));
+
+            if (commentsData.length > 0) {
+                writeCsv(commentsData, path.join(contentFolderPath, '2_comments.csv'));
+            }
+            console.log(`[SUCCESS] Content data saved in folder: ${contentFolderPath}`);
+        } catch (e) {
+            console.error(`[ERROR] Failed to save content files: ${e}`);
+        }
     } else {
         const fileName = `${platform}-${action}-${safeQuery}-${timestamp}.csv`;
         const fullFilePath = path.join(folderPath, fileName);

@@ -1,4 +1,5 @@
 import { createPlaywrightRouter, Dataset } from "crawlee";
+import { parseUniversalDate } from "../../utils/dateParser";
 
 export const router = createPlaywrightRouter();
 
@@ -133,6 +134,7 @@ router.addHandler('SEARCH_GENERAL', async ({ page, log }) => {
     await Dataset.pushData(uniqueVideos);
 });
 
+// handler user details (profile + videos)
 router.addHandler('USER_PROFILE', async ({ page, log }) => {
     log.info('Handling user profile page...');
 
@@ -274,4 +276,127 @@ router.addHandler('USER_PROFILE', async ({ page, log }) => {
     if (videoData.length > 0) {
         await Dataset.pushData(videoData);
     }
+});
+
+// handler content details
+router.addHandler('VIDEO_CONTENT', async ({ page, log, request }) => {
+    log.info(`Handling video content page: ${request.url}`);
+
+    const urlParts = request.url.split('/');
+    const usernameFromUrl = urlParts.find(part => part.startsWith('@'))?.replace('@', '') || '';
+    const userLinkSelector = `a[href*="/@${usernameFromUrl}" i]`;
+
+    try {
+        await page.waitForSelector(userLinkSelector, { timeout: 60000 });
+        log.info('[OK] Content page loaded successfully.');
+        await page.waitForTimeout(2000);
+    } catch (e) {
+        log.error(`[ERROR!] Failed to load video content. It might be deleted/private. Error: ${e}`);
+        await page.screenshot({ path: '../../../storage/content_error.png' });
+        return;
+    }
+
+    const getText = async (selector: string) => {
+        try {
+            return await page.locator(selector).first().innerText();
+        } catch {
+            return '';
+        }
+    };
+
+    // extract basic data
+    const username = usernameFromUrl;
+
+    let isVerified = false;
+    try {
+        const badgeCount = await page.locator(`${userLinkSelector} p + svg`).count();
+        if (badgeCount > 0) {
+            isVerified = true;
+        }
+    } catch (e) {
+        log.warning('[WARNING] Failed to check verified status.');
+    }
+
+    const caption = await getText('[data-e2e="video-desc"]');
+    const likesCount = await getText('[data-e2e="like-count"]');
+    const comentsCount = await getText('[data-e2e="comment-count"]');
+    const savesCount = await getText('[data-e2e="undefined-count"]');
+
+    // if share isnt "share"
+    let sharesCount = '0';
+    try {
+        sharesCount = await getText('[data-e2e="share-count"]');
+        if (sharesCount.toLocaleLowerCase().includes('share')) {
+            sharesCount = '0';
+        } else {
+            sharesCount = await getText('[data-e2e="share-count"]');
+        }
+    }
+    catch (e) {
+        log.warning('[WARNING] Failed to extract shares count. Setting as 0.');
+        sharesCount = '0';
+    }
+    
+    // if any mucic info is available
+    let musicInfo = '';
+    try {
+        const musicLocator = page.locator('a[href*="/music/"]').first();
+        const innerText = await musicLocator.innerText();
+        
+        if (innerText && innerText.trim() !== '') {
+            musicInfo = innerText.trim();
+        } else {
+            const ariaLabel = await musicLocator.getAttribute('aria-label');
+            if (ariaLabel) {
+                musicInfo = ariaLabel.replace(/Watch more videos with music |Tonton lebih banyak video dengan musik /gi, '').trim();
+            } else {
+                const href = await musicLocator.getAttribute('href');
+                if (href && href.includes('/music/')) {
+                    const parts = href.split('/music/')[1].split('-');
+                    parts.pop();
+                    musicInfo = decodeURIComponent(parts.join(' '));
+                }
+            }
+        }
+    } catch (e) {
+        log.warning('[WARNING] Failed to extract music info. Setting as empty string.');
+    }
+
+    // get upload date using time traveler logic
+    let uploadDate = '';
+    try {
+        const dateRawText = await page.evaluate(() => {
+            const spans = Array.from(document.querySelectorAll('span'));
+            const dateSpan = spans.find(span => {
+                const txt = span.textContent?.toLocaleLowerCase() || '';
+                return txt.includes('·') && /\d/.test(txt);
+            });
+            return dateSpan ? dateSpan.textContent : '';
+        });
+
+        uploadDate = parseUniversalDate(dateRawText);
+    } catch (e) {
+        log.warning('[WARNING] Failed to extract upload date. Setting as empty string.');
+    }
+
+    const contentType = request.url.includes('/photo/') ? 'photo' : 'video';
+
+    log.info(`[SUCCESS] Extracted content data: Username: ${username} | Caption: ${caption.substring(0, 30)}... | Likes: ${likesCount} | Comments: ${comentsCount} | Saves: ${savesCount} | Shares: ${sharesCount} | Music: ${musicInfo} | Upload Date: ${uploadDate}`);
+    await Dataset.pushData({
+        dataType: 'content_details',
+        content_url: request.url,
+        content_type: contentType,
+        username: username,
+        is_verified: isVerified ? 'TRUE' : 'FALSE',
+        upload_date: uploadDate,
+        caption: caption.replace(/\n/g, ' '),
+        music_info: musicInfo,
+        likes_count: likesCount,
+        comments_count: comentsCount,
+        saves_count: savesCount,
+        shares_count: sharesCount,
+        scrapedAt: new Date().toISOString()
+    });
+
+    log.info('[DONE] Finished processing video content page.');
 });
