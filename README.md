@@ -17,7 +17,7 @@ No manual cloning or local installation is required—just run it directly via `
 Run the miner directly from your terminal using the following command pattern:
 
 ```bash
-npx bedata-socmed-miner <platform> <action> <keyword>
+npx socmed-miner@latest <platform> <action> <keyword>
 ```
 
 ### Arguments Breakdown:
