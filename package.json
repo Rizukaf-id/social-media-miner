@@ -1,11 +1,18 @@
 {
-  "name": "Social Media Miner",
+  "name": "socmed-miner",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Social Media Scrapper for any platforms (now available for TikTok)",
+  "main": "dist/main.js",
+  "bin": {
+    "social-media-miner": "dist/main.js"
+  },
+  "files": [
+    "dist/**/*"
+  ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "tsx src/main.ts"
+    "start": "ts-node src/main.ts",
+    "build": "tsc",
+    "prepublishOnly": "npm run build"
   },
   "keywords": [],
   "author": "",
