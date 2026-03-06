@@ -39,6 +39,15 @@ npx socmed-miner tiktok scrape "https://www.tiktok.com/@ado1024osenbei/video/761
 
 ---
 
+## ⚠️ Important Notes (Manual Intervention)
+
+Social media platforms have strict anti-bot systems. While this tool heavily automates the extraction process, the browser runs in a visible mode allowing you to assist the bot when necessary:
+
+* **🧩 CAPTCHAs:** If a CAPTCHA puzzle appears, the crawler might pause. **Please solve the CAPTCHA manually** in the opened browser window so the script can resume.
+* **🛑 Unexpected Pop-ups:** If a blocking pop-up appears (e.g., "Login to continue" or "Accept Cookies") and halts the scrolling process, simply **close it manually** and the bot will continue its job.
+
+---
+
 ## 📂 Output Structure
 
 The extracted data will be automatically saved in the `results/` directory within your current working folder. The tool dynamically organizes the output into specific subfolders or files based on the action performed.
