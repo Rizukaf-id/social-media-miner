@@ -1,9 +1,9 @@
 # Human Like Web Scrapper - Social Media Miner ⛏️
 
-[![npm version](https://img.shields.io/npm/v/bedata-socmed-miner.svg)](https://www.npmjs.com/package/bedata-socmed-miner)
+[![npm version](https://img.shields.io/npm/v/socmed-miner.svg)](https://www.npmjs.com/package/socmed-miner)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-**BeData Social Media Miner** is a high-speed, robust CLI (Command Line Interface) tool designed to extract content data and nested comments from social media platforms. Built with Playwright and Crawlee, it effortlessly bypasses Virtual DOM limitations to extract thousands of comments without data loss.
+**HLWB Social Media Miner** is a high-speed, robust CLI (Command Line Interface) tool designed to extract content data and nested comments from social media platforms. Built with Playwright and Crawlee, it effortlessly bypasses Virtual DOM limitations to extract thousands of comments without data loss.
 
 ---
 
