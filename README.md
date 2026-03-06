@@ -1,4 +1,4 @@
-# BeData Social Media Miner ⛏️
+# Human Like Web Scrapper - Social Media Miner ⛏️
 
 [![npm version](https://img.shields.io/npm/v/bedata-socmed-miner.svg)](https://www.npmjs.com/package/bedata-socmed-miner)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
