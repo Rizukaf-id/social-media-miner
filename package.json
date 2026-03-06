@@ -1,6 +1,6 @@
 {
   "name": "socmed-miner",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Social Media Scrapper for any platforms (now available for TikTok)",
   "main": "dist/main.js",
   "bin": {
